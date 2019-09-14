@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MovieDetailsViewController: UIViewController {
+class MovieDetailsViewController: UIViewController,AlertDisplayer {
     
     // MARK: - IBOutlets
     
@@ -29,9 +29,12 @@ class MovieDetailsViewController: UIViewController {
     
     private func loadMovieData(){
         if let movie = self.movie{
-            let image = URL_STRINGS.BIG_IMAGE_PATH + movie.backdropPath
+            if let bigImage = movie.backdropPath{
+            let image = URL_STRINGS.BIG_IMAGE_PATH + bigImage
             if let url = URL(string: image){
                 self.movieImage.load(url: url)
+                }
+                
             }
             self.titleLabel.text = movie.originalTitle
             self.descriptionLabel.text = movie.overview

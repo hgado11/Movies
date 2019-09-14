@@ -10,31 +10,11 @@ import UIKit
 
 class MainViewController: BaseCollectionViewController  {
     
-    
-
-    
-    /// State restoration values.
-    enum RestorationKeys: String {
-        case viewControllerTitle
-        case searchControllerIsActive
-        case searchBarText
-        case searchBarIsFirstResponder
-    }
-    
-    struct SearchControllerRestorableState {
-        var wasActive = false
-        var wasFirstResponder = false
-    }
-    
     // MARK: - Properties
-    var movieList:[Movie]?
     
-    private var nowPlayingViewModel: NowPlayingViewModel!
+    private var viewModel: ViewModel!
     /// Search controller to help us with filtering.
     var searchController: UISearchController!
-    
-    /// Restoration state for UISearchController
-    var restoredState = SearchControllerRestorableState()
     
     // MARK: - LifeCycle
     override func viewDidLoad() {
@@ -70,21 +50,19 @@ class MainViewController: BaseCollectionViewController  {
     }
     
     func loadMovies(){
-        nowPlayingViewModel  = NowPlayingViewModel(delegate: self)
-        nowPlayingViewModel.fetchMovie()
+        viewModel  = ViewModel(delegate: self)
+        viewModel.fetchMovie()
     }
-    
-    
 }
 extension MainViewController: UICollectionViewDataSourcePrefetching{
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         if indexPaths.contains(where: isLoadingCell) {
-            nowPlayingViewModel.fetchMovie()
+            viewModel.fetchMovie()
         }
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return nowPlayingViewModel.totalCount
+        return viewModel.totalCount
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -92,8 +70,11 @@ extension MainViewController: UICollectionViewDataSourcePrefetching{
             fatalError("Couldn't Load Cell")
         }
         if !isLoadingCell(for: indexPath){
-        let movie:Movie = nowPlayingViewModel.movie(at: indexPath.row)
-            cell.configCell(imageurl:movie.posterPath)
+        let movie:Movie = viewModel.movie(at: indexPath.row)
+            if let poster = movie.posterPath{
+                cell.configCell(imageurl:poster)
+                
+            }
             
         }
         
@@ -103,7 +84,7 @@ extension MainViewController: UICollectionViewDataSourcePrefetching{
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let movie:Movie = nowPlayingViewModel.movie(at: indexPath.row)
+        let movie:Movie = viewModel.movie(at: indexPath.row)
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             guard let detailView = storyboard.instantiateViewController(withIdentifier: "MovieDetailsViewController") as? MovieDetailsViewController else{
                 return
@@ -129,23 +110,13 @@ extension MainViewController: UISearchBarDelegate {
 extension MainViewController: UISearchControllerDelegate {
     
     func presentSearchController(_ searchController: UISearchController) {
-        //debugPrint("UISearchControllerDelegate invoked method: \(__FUNCTION__).")
-    }
-    
-    func willPresentSearchController(_ searchController: UISearchController) {
-        //debugPrint("UISearchControllerDelegate invoked method: \(__FUNCTION__).")
-    }
-    
-    func didPresentSearchController(_ searchController: UISearchController) {
-        //debugPrint("UISearchControllerDelegate invoked method: \(__FUNCTION__).")
-    }
-    
-    func willDismissSearchController(_ searchController: UISearchController) {
-        //debugPrint("UISearchControllerDelegate invoked method: \(__FUNCTION__).")
+        viewModel.resetCounter()
+        collectionView.reloadData()
     }
     
     func didDismissSearchController(_ searchController: UISearchController) {
-        loadMovies()
+        viewModel.resetCounter()
+        viewModel.fetchMovie()
     }
     
 }
@@ -155,7 +126,7 @@ extension MainViewController: UISearchControllerDelegate {
 extension MainViewController: UISearchResultsUpdating {
     
     func findMovie(movie:String)  {
-        
+        viewModel.searchForMoview(query: movie)
     }
     
     func updateSearchResults(for searchController: UISearchController) {
@@ -166,7 +137,7 @@ extension MainViewController: UISearchResultsUpdating {
     }
     
 }
-extension MainViewController:NowPlayingViewModelDelegate{
+extension MainViewController:ViewModelDelegate{
     
     func onFetchCompleted(with newIndexPathsToReload: [IndexPath]?) {
         indicatorView.stopAnimating()
@@ -175,13 +146,8 @@ extension MainViewController:NowPlayingViewModelDelegate{
             return
         }
         let indexPathsToReload = visibleIndexPathsToReload(intersecting: newIndexPathsToReload)
-        if(indexPathsToReload.count > 0){
-            collectionView.reloadItems(at: indexPathsToReload)
-            
-        }else{
-            
-            collectionView.reloadData()
-        }
+        collectionView.reloadItems(at: indexPathsToReload)
+       
     }
     
     func onFetchFailed(with reason: String) {
@@ -191,7 +157,7 @@ extension MainViewController:NowPlayingViewModelDelegate{
         displayAlert(with: title , message: reason, actions: [action])
     }
     func isLoadingCell(for indexPath: IndexPath) -> Bool {
-        return indexPath.row >= nowPlayingViewModel.currentMoviesCount
+        return indexPath.row >= viewModel.currentMoviesCount
     }
     
     func visibleIndexPathsToReload(intersecting indexPaths: [IndexPath]) -> [IndexPath] {
