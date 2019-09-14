@@ -14,9 +14,7 @@ let imageCache = NSCache<AnyObject, AnyObject>()
 extension UIImageView {
     
     func load(url: URL) {
-        debugPrint("Load Image: ", url)
-        
-        if let catchedImage = imageCache.object(forKey: url as AnyObject) {
+       if let catchedImage = imageCache.object(forKey: url as AnyObject) {
             self.image = (catchedImage as! UIImage)
             return
         }

@@ -23,6 +23,7 @@ class MovieDetailsViewController: UIViewController,AlertDisplayer {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.tintColor = .white
         self.loadMovieData()
         
     }

@@ -53,7 +53,6 @@ final class NetworkClient {
                 let movies = try JSONDecoder().decode(Movies.self, from:data)
                 completion(Result.success(movies as Movies))
             } catch let parseError {
-                print(parseError)
                 completion(Result.failure(DataResponseError.decoding))
             }
             

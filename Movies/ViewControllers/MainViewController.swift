@@ -32,7 +32,7 @@ class MainViewController: BaseCollectionViewController  {
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
         searchController.searchBar.sizeToFit()
-        
+        searchController.searchBar.tintColor = .white
         
         navigationController?.navigationBar.prefersLargeTitles = true
         

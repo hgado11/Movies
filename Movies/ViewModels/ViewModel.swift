@@ -94,19 +94,10 @@ final class ViewModel {
             case .success(let response):
                 DispatchQueue.main.async {
                     // 1
-                    self.currentPage += 1
                     self.total = response.total_results
                     self.isFetchInProgress = false
-                    self.movies.append(contentsOf: response.movies)
-                    
-                    
-                    // 3
-                    if response.page > 1 {
-                        let indexPathsToReload = self.calculateIndexPathsToReload(from: response.movies)
-                        self.delegate?.onFetchCompleted(with: indexPathsToReload)
-                    } else {
-                        self.delegate?.onFetchCompleted(with: .none)
-                    }
+                    self.movies = response.movies
+                    self.delegate?.onFetchCompleted(with: .none)
                 }
             }
         }
