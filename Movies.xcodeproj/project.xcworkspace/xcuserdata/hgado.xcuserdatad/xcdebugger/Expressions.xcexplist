@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "NetworkClient.getMovies(apiendPoint:movie:page:completion:):NetworkClient.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "buildUrl(apiEndpoint: apiendPoint, page: page, name: movie)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
